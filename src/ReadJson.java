@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 public class ReadJson {
@@ -14,15 +15,18 @@ public class ReadJson {
         try{
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Введите путь к файлу с данными:");
-            String fileName = bufferedReader.readLine();//"C:\\Users\\Tamara\\Downloads\\Education\\test.json";
+            String fileName = bufferedReader.readLine();//"C:\\Users\\Tamara\\Downloads\\Education\\test2.json";
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
             //Чтение из файла
             Organisation[] organisations = gson.fromJson(reader,Organisation[].class);
-            System.out.println("Список организаций:");
             for (int i = 0; i < organisations.length; i++) {
-                organisations[i].orgInfo();
+                organisations[i].setDate();
             }
-            System.out.println("Конец списка организаций.");
+            System.out.println("Список компаний:");
+            Arrays.stream(organisations).forEach(organisation ->
+                    System.out.println(organisation.getName_short()
+                            + " Дата основания "
+                            + new SimpleDateFormat("dd/MM/yy").format(organisation.getDate())));
             int counter = 0;
             System.out.println("Просроченные бумаги");
             for (int i = 0; i < organisations.length; i++) {
@@ -43,46 +47,98 @@ public class ReadJson {
             }
             System.out.println("Введите код валюты для поиска ценных бумаг.");
             String chosenCurrency = bufferedReader.readLine();
-            System.out.println("Список ценных бумаг:");
+            Boolean isUse = false;
             for (int i = 0; i < organisations.length; i++) {
-                organisations[i].useCurrency(chosenCurrency.toLowerCase());
+                if (organisations[i].useCurrency(chosenCurrency.toLowerCase())){
+                    isUse = true;
+                }
             }
-            System.out.println("Конец списка ценных бумаг.");
+            if (!isUse){
+                System.out.println("Нет ценных бумаг в такой валюте!");
+            }
             bufferedReader.close();
         } catch (FileNotFoundException e){
             System.out.println(e.getMessage());
         }
 
     }
-    public static Date dataTransformer(String dateInString){
+    private static Date dataTransformer(String dateInString){
         Date date = null;
         try {
-            if (dateInString.length() == 8) {
-                if (dateInString.contains("/")) {
-                    return date = new SimpleDateFormat("dd/MM/yy").parse(dateInString);
-                } else if (dateInString.contains(".")) {
-                    return date = new SimpleDateFormat("dd.MM.yy").parse(dateInString);
-                } else {
-                    System.out.println("Невозможно преоброзовать дату!");
-                    return date;
+            boolean isNormal = true;
+            //Проверка корректности ввода даты
+            if (dateInString.length()>5) {
+                int day = Integer.parseInt(dateInString.substring(0, 2));
+                int month = Integer.parseInt(dateInString.substring(3, 5));
+                int year = Integer.parseInt(dateInString.substring(6));
+                switch (month){
+                    case (1):
+                    case (3):
+                    case (5):
+                    case (7):
+                    case (8):
+                    case (10):
+                    case (12):
+                        if ((day < 1)||(day > 31)) {
+                            System.out.println("N");
+                            isNormal = false;
+                        }
+                        break;
+                    case (4):
+                    case (6):
+                    case (9):
+                    case (11):
+                        if ((day < 1) || ( day > 30)) {
+                            isNormal = false;
+                            System.out.println("C");
+                        }
+                        break;
+                    case (2):
+                        if ((year % 4) == 0){
+                            if ((day < 1) || ( day > 29)) {
+                                isNormal = false;
+                                System.out.println("F1");
+                            }
+                            break;
+                        }
+                        else {
+                            if ((day < 1) || ( day > 28)) {
+                                isNormal = false;
+                                System.out.println("F2");
+
+                            }
+                            break;
+                        }
+                        default:
+                            isNormal = false;
+                            System.out.println("yghjgu");
+                            break;
                 }
-            } else if (dateInString.length() == 10) {
+            }
+            //Проверка корректности формата
+            if ((dateInString.length() == 8) && isNormal) {
                 if (dateInString.contains("/")) {
-                    return date = new SimpleDateFormat("dd/MM/y").parse(dateInString);
+                    date = new SimpleDateFormat("dd/MM/yy").parse(dateInString);
                 } else if (dateInString.contains(".")) {
-                    return date = new SimpleDateFormat("dd.MM.y").parse(dateInString);
+                    date = new SimpleDateFormat("dd.MM.yy").parse(dateInString);
                 } else {
                     System.out.println("Невозможно преоброзовать дату!");
-                    return date;
+                }
+            } else if ((dateInString.length() == 10) && isNormal) {
+                if (dateInString.contains("/")) {
+                    date = new SimpleDateFormat("dd/MM/y").parse(dateInString);
+                } else if (dateInString.contains(".")) {
+                    date = new SimpleDateFormat("dd.MM.y").parse(dateInString);
+                } else {
+                    System.out.println("Невозможно преоброзовать дату!");
                 }
             } else {
                 System.out.println("Невозможно преоброзовать дату!");
-                return date;
             }
         }catch (ParseException e){
-            System.out.println("Невозможно преоброзовать дату!");
-            return date;
+            System.out.println(e.getStackTrace());
         }
+        return date;
     }
 
 }

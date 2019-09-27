@@ -1,8 +1,5 @@
-//import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 public class Organisation {
     private int id;
@@ -21,57 +18,60 @@ public class Organisation {
     private String www;
     private boolean isResident;
     private Shares[] securities;
+    private Date date;
 
 
     public Organisation() {}
 
-    public void orgInfo (){
-        try {
-            Date date = new SimpleDateFormat("y-MM-dd").parse(this.egrul_date);
-            System.out.println(this.name_short + " Дата основания " + new SimpleDateFormat("dd/MM/yy").format(date));
-        }
-        catch (ParseException e){
+    public String getName_short() {
+        return name_short;
+    }
 
-        }
+    public Date getDate() {
+        return date;
+    }
+
+    public Shares[] getSecurities() {
+        return securities;
     }
 
     public int oldShares (){
         int counter = 0;
+        long today = new Date().getTime();
         for (int i = 0; i < securities.length; i++) {
-            Date today = new Date();
-                try {
-                    Date date = new SimpleDateFormat("y-MM-dd").parse(securities[i].getDate_to());
-                    if (date.getTime() < today.getTime()){
-                        System.out.println(securities[i].getCode() + " " +securities[i].getDate_to()+ " " + name_full);
-                        counter++;
-                    }
-                }
-                catch (ParseException e){
-
-                }
-
+            securities[i].setDates();
+            if (securities[i].getDate().getTime() < today){
+                System.out.println(securities[i].getCode() + " " + securities[i].getDate_to() + " " + name_full);
+                counter++;
+            }
         }
         return counter;
     }
 
     public void isOlder (Date testDate){
-        try {
-            Date date = new SimpleDateFormat("y-MM-dd").parse(egrul_date);
-            if (date.getTime()>testDate.getTime()){
-                this.orgInfo();
+            if (date.getTime() > testDate.getTime()){
+                System.out.println(this.name_short + " Дата основания " + new SimpleDateFormat("dd/MM/yy").format(date));
             }
-        }
-        catch (ParseException e){
 
-        }
     }
 
-    public void useCurrency(String chosenCurrency){
+    public Boolean useCurrency(String chosenCurrency){
+        Boolean isItSo = false;
         for (int i = 0; i < securities.length; i++) {
             if (chosenCurrency.equals(securities[i].getCurrency().getCode())){
                 System.out.println(name_short + " " + securities[i].getId() + " " + securities[i].getCode());
+                isItSo = true;
             }
         }
+        return isItSo;
     }
 
+    public void setDate() {
+        try {
+            this.date = new SimpleDateFormat("y-MM-dd").parse(egrul_date);
+        }
+        catch (ParseException e){
+            e.printStackTrace();
+        }
+    }
 }

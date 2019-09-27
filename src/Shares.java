@@ -11,6 +11,7 @@ public class Shares {
     private String state_reg_date;
     private StatesOfShares state;
     private Currency currency;
+    private Date date;
 
     public String getDate_to() {
         return date_to;
@@ -26,5 +27,17 @@ public class Shares {
 
     public int getId() {
         return id;
+    }
+
+    public void setDates() {
+        try {
+            this.date = new SimpleDateFormat("y-MM-dd").parse(date_to);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Date getDate() {
+        return date;
     }
 }
